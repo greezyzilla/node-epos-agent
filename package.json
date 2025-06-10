@@ -1,0 +1,40 @@
+{
+  "name": "print-agent",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "start:no-warnings": "node --no-deprecation src/index.js",
+    "autostart:install": "node src/setup/cli.js install",
+    "autostart:uninstall": "node src/setup/cli.js uninstall",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "print",
+    "barcode",
+    "escpos"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "Local backend for barcode printing with escpos",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.9",
+    "escpos": "^3.0.0-alpha.6",
+    "escpos-network": "^3.0.0-alpha.5",
+    "escpos-serialport": "^3.0.0-alpha.4",
+    "escpos-usb": "^3.0.0-alpha.4",
+    "express": "^4.18.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "overrides": {
+    "usb": "1.8.8"
+  }
+}
