@@ -79,7 +79,7 @@ function installWindowsAutostart() {
   
   const batchContent = `@echo off
 cd /d "${appRoot}"
-"${nodePath}" --no-deprecation "${scriptPath}"
+"${nodePath}" "${scriptPath}" --background
 `;
 
   fs.writeFileSync(batchFilePath, batchContent);
@@ -119,8 +119,8 @@ function installMacAutostart() {
     <key>ProgramArguments</key>
     <array>
         <string>${nodePath}</string>
-        <string>--no-deprecation</string>
         <string>${scriptPath}</string>
+        <string>--background</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -182,7 +182,7 @@ Description=${appName} service
 After=network.target
 
 [Service]
-ExecStart=${nodePath} --no-deprecation ${scriptPath}
+ExecStart=${nodePath} ${scriptPath} --background
 WorkingDirectory=${appRoot}
 Restart=always
 RestartSec=10

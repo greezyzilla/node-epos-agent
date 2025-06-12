@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const printerStatusIndicator = document.getElementById('printer-status-indicator');
   const printerStatus = document.getElementById('printer-status');
   const printerInfo = document.getElementById('printer-info');
+  const serverPid = document.getElementById('server-pid');
+  const terminateBtn = document.getElementById('terminate-btn');
   
   // DOM Elements - Printer Selection
   const printerSelect = document.getElementById('printer-select');
@@ -52,6 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let batchItems = [];
   let currentBatchItemType = null;
 
+  // Store the termination key
+  let terminationKey = null;
+
   // Initialize the application
   initialize();
 
@@ -69,6 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Event Listeners - Queue & Logs
   clearQueueBtn.addEventListener('click', clearQueue);
+  
+  // Event Listeners - System
+  terminateBtn.addEventListener('click', terminateApplication);
   
   // Auto-refresh timers
   let queueRefreshTimer = null;
@@ -109,36 +117,51 @@ document.addEventListener('DOMContentLoaded', () => {
           // Format server info
           const info = data.data.server.info;
           serverInfo.textContent = `${info.hostname} (${info.platform}/${info.arch})`;
+          serverPid.textContent = `PID: ${info.pid}`;
+          
+          // Store termination key
+          terminationKey = data.data.server.terminationKey;
+          
+          // Enable terminate button
+          terminateBtn.disabled = false;
+          
+          // Update printer status
+          if (data.data.printer.connected) {
+            printerStatusIndicator.classList.remove('status-offline');
+            printerStatusIndicator.classList.add('status-online');
+            printerStatus.textContent = 'Connected';
+            
+            // Format printer info
+            const info = data.data.printer.info;
+            if (info) {
+              printerInfo.textContent = `ID: ${info.vendorId}:${info.productId}`;
+            } else {
+              printerInfo.textContent = 'Default printer set but not connected';
+            }
+          } else {
+            printerStatusIndicator.classList.remove('status-online');
+            printerStatusIndicator.classList.add('status-offline');
+            printerStatus.textContent = 'Not Connected';
+            
+            if (data.data.printer.default) {
+              printerInfo.textContent = 'Default printer not connected';
+            } else {
+              printerInfo.textContent = 'No default printer selected';
+            }
+          }
         } else {
           serverStatusIndicator.classList.remove('status-online');
           serverStatusIndicator.classList.add('status-offline');
           serverStatus.textContent = 'Offline';
           serverInfo.textContent = 'No information available';
-        }
-        
-        // Update printer status
-        if (data.data.printer.connected) {
-          printerStatusIndicator.classList.remove('status-offline');
-          printerStatusIndicator.classList.add('status-online');
-          printerStatus.textContent = 'Connected';
+          serverPid.textContent = '';
+          terminateBtn.disabled = true;
           
-          // Format printer info
-          const info = data.data.printer.info;
-          if (info) {
-            printerInfo.textContent = `ID: ${info.vendorId}:${info.productId}`;
-          } else {
-            printerInfo.textContent = 'Default printer set but not connected';
-          }
-        } else {
+          // Update printer status
           printerStatusIndicator.classList.remove('status-online');
           printerStatusIndicator.classList.add('status-offline');
           printerStatus.textContent = 'Not Connected';
-          
-          if (data.data.printer.default) {
-            printerInfo.textContent = 'Default printer not connected';
-          } else {
-            printerInfo.textContent = 'No default printer selected';
-          }
+          printerInfo.textContent = 'Cannot check printer status';
         }
       } else {
         showToast('Status Error', data.message || 'Failed to get status', 'error');
@@ -152,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
       serverStatusIndicator.classList.add('status-offline');
       serverStatus.textContent = 'Offline';
       serverInfo.textContent = 'Cannot connect to server';
+      serverPid.textContent = '';
+      terminateBtn.disabled = true;
       
       printerStatusIndicator.classList.remove('status-online');
       printerStatusIndicator.classList.add('status-offline');
@@ -655,5 +680,61 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Show the toast
     toast.show();
+  }
+
+  async function terminateApplication() {
+    if (!terminationKey) {
+      showToast('Terminate Error', 'Termination key not available', 'error');
+      return;
+    }
+    
+    // Ask for confirmation
+    if (!confirm('Are you sure you want to terminate this application instance?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/terminate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          terminationKey
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('Terminate', 'Application is shutting down...', 'success');
+        
+        // Disable all controls
+        terminateBtn.disabled = true;
+        
+        // Update UI to show shutdown
+        serverStatusIndicator.classList.remove('status-online');
+        serverStatusIndicator.classList.add('status-offline');
+        serverStatus.textContent = 'Shutting down...';
+        
+        // Redirect to a "server not available" page after a brief delay
+        setTimeout(() => {
+          document.body.innerHTML = `
+            <div class="container mt-5">
+              <div class="alert alert-warning">
+                <h4>Application Terminated</h4>
+                <p>The print agent has been shut down. You can close this window or reload the page to check if another instance is available.</p>
+                <button class="btn btn-primary" onclick="location.reload()">Reload Page</button>
+              </div>
+            </div>
+          `;
+        }, 2000);
+      } else {
+        showToast('Terminate Error', data.message || 'Failed to terminate application', 'error');
+      }
+    } catch (error) {
+      console.error('Terminate error:', error);
+      showToast('Terminate Error', 'Failed to terminate application', 'error');
+    }
   }
 }); 

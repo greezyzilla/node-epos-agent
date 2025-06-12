@@ -53,15 +53,20 @@ const getStatus = (req, res) => {
       memoryUsage: {
         total: os.totalmem(),
         free: os.freemem()
-      }
+      },
+      pid: process.pid
     };
+    
+    // Get termination key from app settings
+    const terminationKey = req.app.get('terminationKey');
     
     return res.json({
       success: true,
       data: {
         server: {
           status: 'online',
-          info: serverInfo
+          info: serverInfo,
+          terminationKey
         },
         printer: {
           connected: printerConnected,

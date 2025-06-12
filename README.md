@@ -58,6 +58,11 @@ A local backend service built with Express.js for printing text and barcodes usi
    ```
    npm run start:no-warnings
    ```
+   
+   To run in background mode (without showing terminal window):
+   ```
+   npm run start:background
+   ```
 
 4. Access the web interface at:
    ```
@@ -83,6 +88,29 @@ When using mock mode, the system will:
 1. Display simulated printer commands in the console
 2. Return success responses for all print operations
 3. Include mock output data in API responses
+
+## Background Mode
+
+The application can run in background mode without showing a terminal window. This is useful when:
+- You want to run the application without a visible terminal/command prompt
+- You need to start the application from a script or service
+- You're setting up the application to run at system startup
+
+When running in background mode:
+- Console output is redirected to log files in the `logs` directory
+- The process runs detached from the terminal
+- You can still access the web interface as normal
+
+To terminate the application when running in background mode, use the "Terminate Application" button in the dashboard.
+
+## Terminating the Application
+
+The dashboard includes a "Terminate Application" button in the System Status section. This is useful when:
+- You need to shut down the application cleanly
+- Another instance is already running and you need to free the port
+- You're running the application in background mode and need a way to stop it
+
+The terminate function is protected by a server-generated key that is unique to each instance, so only the current session can terminate the application.
 
 ## API Endpoints
 

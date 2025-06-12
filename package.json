@@ -6,6 +6,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "start:no-warnings": "node --no-deprecation src/index.js",
+    "start:background": "node start-background.js",
     "autostart:install": "node src/setup/cli.js install",
     "autostart:uninstall": "node src/setup/cli.js uninstall",
     "test": "echo \"Error: no test specified\" && exit 1"
