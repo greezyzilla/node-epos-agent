@@ -6,6 +6,9 @@ A local backend service built with Express.js for printing text and barcodes usi
 
 - Print text to thermal printers
 - Print barcodes with customizable options
+- Batch printing for multiple items in a single job
+- Print queue management system
+- Print job logs and history
 - Select and manage printer devices
 - Simple web UI for interacting with the service
 - Real-time server and printer status monitoring
@@ -90,14 +93,14 @@ http://localhost:3310/api-docs
 
 ### Print Operations
 
-- **POST /api/print/text** - Print text to the default printer
+- **POST /api/print/text** - Add text print job to queue
   ```json
   {
     "text": "Text to print"
   }
   ```
 
-- **POST /api/print/barcode** - Print barcode to the default printer
+- **POST /api/print/barcode** - Add barcode print job to queue
   ```json
   {
     "code": "1234567890128",
@@ -108,6 +111,41 @@ http://localhost:3310/api-docs
     "font": "A"
   }
   ```
+
+- **POST /api/print/batch** - Add batch print job to queue
+  ```json
+  {
+    "items": [
+      {
+        "type": "text",
+        "content": "Header text",
+        "quantity": 1
+      },
+      {
+        "type": "barcode",
+        "code": "1234567890128",
+        "barcodeType": "EAN13",
+        "width": 2,
+        "height": 100,
+        "position": "BLW",
+        "font": "A",
+        "quantity": 2
+      },
+      {
+        "type": "text",
+        "content": "Footer text",
+        "quantity": 1
+      }
+    ]
+  }
+  ```
+
+### Queue Management
+
+- **GET /api/print/queue** - Get current print queue
+- **DELETE /api/print/queue/clear** - Clear the print queue
+- **DELETE /api/print/queue/:jobId** - Remove a specific job from the queue
+- **GET /api/print/logs** - Get print job logs history
 
 ### Device Management
 
@@ -171,6 +209,35 @@ The autostart feature uses platform-specific methods:
 - **Linux**: Uses systemd user services with a fallback to desktop autostart files
 
 You can also manage autostart through the web interface by navigating to the Status page.
+
+## Using the Queue System
+
+The print agent includes a robust queue system for managing print jobs. This provides several benefits:
+
+1. **Job Persistence**: Print jobs are added to a queue and processed one at a time
+2. **Failure Handling**: If a print job fails, subsequent jobs will still be processed
+3. **Job Management**: Jobs can be removed from the queue before processing
+4. **Logging**: All print operations are logged with timestamps and status
+
+### Queue Dashboard
+
+The web interface includes a queue dashboard that shows:
+
+- Current jobs in the queue with status (pending, processing, completed, failed)
+- History of print operations with timestamps
+- Controls to manage the queue (remove jobs, clear queue)
+
+### Batch Printing
+
+The batch printing feature allows you to send multiple print items in a single job:
+
+1. Use the "Batch" tab in the print controls
+2. Add text and barcode items to the batch using the provided buttons
+3. Configure each item's properties in the modal dialog
+4. Set the quantity for each item (defaults to 1 if not specified)
+5. Submit the batch job with the "Print Batch" button
+
+This is useful for printing receipts or labels that contain a combination of text and barcodes. The quantity feature allows you to print multiple copies of a specific item within the batch without having to add the same item multiple times.
 
 ## Troubleshooting
 

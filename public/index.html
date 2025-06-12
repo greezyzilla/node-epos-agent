@@ -36,6 +36,55 @@
       .btn-print {
         min-width: 100px;
       }
+      .queue-item {
+        border-left: 4px solid #ccc;
+        padding: 10px;
+        margin-bottom: 8px;
+        background-color: #f8f9fa;
+      }
+      .queue-item.pending {
+        border-left-color: #ffc107;
+      }
+      .queue-item.processing {
+        border-left-color: #17a2b8;
+      }
+      .queue-item.completed {
+        border-left-color: #28a745;
+      }
+      .queue-item.failed {
+        border-left-color: #dc3545;
+      }
+      .log-item {
+        padding: 6px 10px;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+        border-radius: 4px;
+      }
+      .log-item.queued {
+        background-color: #fff3cd;
+      }
+      .log-item.processing {
+        background-color: #d1ecf1;
+      }
+      .log-item.completed {
+        background-color: #d4edda;
+      }
+      .log-item.failed {
+        background-color: #f8d7da;
+      }
+      .log-item.removed {
+        background-color: #e2e3e5;
+      }
+      .log-item.system {
+        background-color: #e2e3e5;
+      }
+      .log-timestamp {
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+      .nav-tabs {
+        margin-bottom: 15px;
+      }
     </style>
   </head>
   <body>
@@ -101,94 +150,269 @@
         </div>
       </div>
 
-      <!-- Print Text Card -->
+      <!-- Print Controls Card -->
       <div class="card">
-        <div class="card-header bg-primary text-white">Print Text</div>
+        <div class="card-header bg-primary text-white">Print Controls</div>
         <div class="card-body">
-          <div class="mb-3">
-            <label for="text-input" class="form-label">Text to Print</label>
-            <textarea
-              class="form-control"
-              id="text-input"
-              rows="3"
-              placeholder="Enter text to print"
-            ></textarea>
+          <ul class="nav nav-tabs" id="print-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="text-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#text-panel"
+                type="button"
+                role="tab"
+                aria-controls="text-panel"
+                aria-selected="true"
+              >
+                Text
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="barcode-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#barcode-panel"
+                type="button"
+                role="tab"
+                aria-controls="barcode-panel"
+                aria-selected="false"
+              >
+                Barcode
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="batch-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#batch-panel"
+                type="button"
+                role="tab"
+                aria-controls="batch-panel"
+                aria-selected="false"
+              >
+                Batch
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="print-tab-content">
+            <!-- Text Print Panel -->
+            <div
+              class="tab-pane fade show active"
+              id="text-panel"
+              role="tabpanel"
+              aria-labelledby="text-tab"
+            >
+              <div class="mb-3">
+                <label for="text-input" class="form-label">Text to Print</label>
+                <textarea
+                  class="form-control"
+                  id="text-input"
+                  rows="3"
+                  placeholder="Enter text to print"
+                ></textarea>
+              </div>
+              <button class="btn btn-primary btn-print" id="print-text-btn">
+                Print
+              </button>
+            </div>
+
+            <!-- Barcode Print Panel -->
+            <div
+              class="tab-pane fade"
+              id="barcode-panel"
+              role="tabpanel"
+              aria-labelledby="barcode-tab"
+            >
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="barcode-input" class="form-label"
+                    >Barcode Content</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="barcode-input"
+                    placeholder="Enter barcode content"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="barcode-type" class="form-label"
+                    >Barcode Type</label
+                  >
+                  <select class="form-select" id="barcode-type">
+                    <option value="EAN13">EAN-13</option>
+                    <option value="EAN8">EAN-8</option>
+                    <option value="UPC-A">UPC-A</option>
+                    <option value="UPC-E">UPC-E</option>
+                    <option value="CODE39">CODE39</option>
+                    <option value="ITF">ITF</option>
+                    <option value="NW7">NW7</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="barcode-width" class="form-label"
+                    >Width (1-5)</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="barcode-width"
+                    min="1"
+                    max="5"
+                    value="2"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="barcode-height" class="form-label"
+                    >Height (1-255)</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="barcode-height"
+                    min="1"
+                    max="255"
+                    value="100"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label for="barcode-position" class="form-label"
+                    >Text Position</label
+                  >
+                  <select class="form-select" id="barcode-position">
+                    <option value="BLW">Below</option>
+                    <option value="ABV">Above</option>
+                    <option value="BTH">Both</option>
+                    <option value="OFF">Off</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-print" id="print-barcode-btn">
+                Print Barcode
+              </button>
+            </div>
+
+            <!-- Batch Print Panel -->
+            <div
+              class="tab-pane fade"
+              id="batch-panel"
+              role="tabpanel"
+              aria-labelledby="batch-tab"
+            >
+              <div class="mb-3">
+                <label class="form-label">Batch Items</label>
+                <div id="batch-items-container">
+                  <p class="text-muted">No items added to batch yet.</p>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  id="add-text-item-btn"
+                >
+                  Add Text Item
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  id="add-barcode-item-btn"
+                >
+                  Add Barcode Item
+                </button>
+              </div>
+
+              <button
+                class="btn btn-primary btn-print"
+                id="print-batch-btn"
+                disabled
+              >
+                Print Batch
+              </button>
+            </div>
           </div>
-          <button class="btn btn-primary btn-print" id="print-text-btn">
-            Print
-          </button>
         </div>
       </div>
 
-      <!-- Print Barcode Card -->
+      <!-- Queue and Logs Card -->
       <div class="card">
-        <div class="card-header bg-primary text-white">Print Barcode</div>
+        <div class="card-header bg-primary text-white">Queue & Logs</div>
         <div class="card-body">
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="barcode-input" class="form-label"
-                >Barcode Content</label
+          <ul class="nav nav-tabs" id="queue-logs-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="queue-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#queue-panel"
+                type="button"
+                role="tab"
+                aria-controls="queue-panel"
+                aria-selected="true"
               >
-              <input
-                type="text"
-                class="form-control"
-                id="barcode-input"
-                placeholder="Enter barcode content"
-              />
+                Print Queue
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="logs-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#logs-panel"
+                type="button"
+                role="tab"
+                aria-controls="logs-panel"
+                aria-selected="false"
+              >
+                Print Logs
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="queue-logs-content">
+            <!-- Queue Panel -->
+            <div
+              class="tab-pane fade show active"
+              id="queue-panel"
+              role="tabpanel"
+              aria-labelledby="queue-tab"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 mt-3"
+              >
+                <h5 class="mb-0">Current Queue</h5>
+                <button class="btn btn-sm btn-danger" id="clear-queue-btn">
+                  Clear Queue
+                </button>
+              </div>
+
+              <div id="queue-container">
+                <p class="text-muted">Queue is empty.</p>
+              </div>
             </div>
-            <div class="col-md-6">
-              <label for="barcode-type" class="form-label">Barcode Type</label>
-              <select class="form-select" id="barcode-type">
-                <option value="EAN13">EAN-13</option>
-                <option value="EAN8">EAN-8</option>
-                <option value="UPC-A">UPC-A</option>
-                <option value="UPC-E">UPC-E</option>
-                <option value="CODE39">CODE39</option>
-                <option value="ITF">ITF</option>
-                <option value="NW7">NW7</option>
-              </select>
+
+            <!-- Logs Panel -->
+            <div
+              class="tab-pane fade"
+              id="logs-panel"
+              role="tabpanel"
+              aria-labelledby="logs-tab"
+            >
+              <div class="mt-3 mb-2">
+                <h5>Print Job Logs</h5>
+              </div>
+
+              <div id="logs-container">
+                <p class="text-muted">No logs available.</p>
+              </div>
             </div>
           </div>
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <label for="barcode-width" class="form-label">Width (1-5)</label>
-              <input
-                type="number"
-                class="form-control"
-                id="barcode-width"
-                min="1"
-                max="5"
-                value="2"
-              />
-            </div>
-            <div class="col-md-4">
-              <label for="barcode-height" class="form-label"
-                >Height (1-255)</label
-              >
-              <input
-                type="number"
-                class="form-control"
-                id="barcode-height"
-                min="1"
-                max="255"
-                value="100"
-              />
-            </div>
-            <div class="col-md-4">
-              <label for="barcode-position" class="form-label"
-                >Text Position</label
-              >
-              <select class="form-select" id="barcode-position">
-                <option value="BLW">Below</option>
-                <option value="ABV">Above</option>
-                <option value="BTH">Both</option>
-                <option value="OFF">Off</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn btn-primary btn-print" id="print-barcode-btn">
-            Print Barcode
-          </button>
         </div>
       </div>
     </div>
@@ -212,6 +436,45 @@
           ></button>
         </div>
         <div class="toast-body" id="toast-body">Message here</div>
+      </div>
+    </div>
+
+    <!-- Batch Item Modal -->
+    <div
+      class="modal fade"
+      id="batch-item-modal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="batch-item-modal-title">
+              Add Item to Batch
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="batch-item-modal-body">
+            <!-- Content will be dynamically inserted -->
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary" id="add-to-batch-btn">
+              Add to Batch
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
