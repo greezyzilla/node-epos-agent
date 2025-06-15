@@ -73,7 +73,7 @@ const processQueue = async () => {
           reject(new Error(`Failed to open printer: ${err.message}`));
           return;
         }
-        
+
         try {
           printer.font('a').align('ct');
           
@@ -101,22 +101,23 @@ const processQueue = async () => {
                     width: item.width,
                     height: item.height,
                     position: item.position,
-                    font: item.font
+                    font: item.font,
                   });
                 }
                 
                 // Only add spacing between items if not the last repetition
                 if (i < quantity - 1) {
-                  printer.text('\n');
+                  printer.text('\n\n');
                 }
               }
               
               // Add small spacing between different items
-              printer.text('\n');
+              printer.text('\n\n');
             });
           }
           
-          printer.cut().close();
+          // printer.cut().close();
+          printer.close()
           resolve();
         } catch (error) {
           reject(error);
