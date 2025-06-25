@@ -86,6 +86,8 @@ const processQueue = async () => {
               position: job.position,
               font: job.font
             });
+            
+            printer.text('\n\n');
           } else if (job.type === 'batch') {
             // Handle batch job
             job.items.forEach(item => {
@@ -103,16 +105,10 @@ const processQueue = async () => {
                     position: item.position,
                     font: item.font,
                   });
-                }
-                
-                // Only add spacing between items if not the last repetition
-                if (i < quantity - 1) {
+
                   printer.text('\n\n');
                 }
               }
-              
-              // Add small spacing between different items
-              printer.text('\n\n');
             });
           }
           
